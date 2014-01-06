@@ -16,13 +16,3 @@ if not JQUERY_URLS:
             'plugins.fkautocomplete': STATICMEDIA_PREFIX + 'js/plugins/jquery.fkautocomplete.js',
             'plugins.autocomplete': STATICMEDIA_PREFIX + 'js/plugins/jquery.autocomplete.js',
         }
-    if 'cms' in settings.INSTALLED_APPS:
-        # use whatever js is provided by the cms, to avoid loading the same js twice.
-        from cms.utils import cms_static_url
-        import cms
-        if cms.__version__.startswith('3'):
-            JQUERY_URLS['core'] = cms_static_url('js/plugins/jquery.query.js')
-        else:
-            JQUERY_URLS['core'] = cms_static_url('js/libs/jquery.query.js')
-            JQUERY_URLS['admincompat'] = cms_static_url('js/plugins/admincompat.js')
-            JQUERY_URLS['ui.core'] = cms_static_url('js/libs/jquery.ui.core.jss')
