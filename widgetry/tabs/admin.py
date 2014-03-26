@@ -186,5 +186,4 @@ class ModelAdminWithTabs(admin.ModelAdmin):
               JQUERY_URLS['admincompat'],
               JQUERY_URLS['core'],
               JQUERY_URLS['ui.core'],
-              JQUERY_URLS['ui.tabs'],
         )

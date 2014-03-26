@@ -9,10 +9,9 @@ if not STATICMEDIA_PREFIX:
 JQUERY_URLS = getattr(settings, 'WIDGETRY_JQUERY_URLS', getattr(settings, 'JQUERY_URLS', None))
 if not JQUERY_URLS:
     JQUERY_URLS = {
-            'core': STATICMEDIA_PREFIX + 'js/jquery-1.3.2.js',
+            'core': STATICMEDIA_PREFIX + 'js/jquery-1.9.0.min.js',
             'admincompat': STATICMEDIA_PREFIX + 'js/admincompat.js',
-            'ui.core': STATICMEDIA_PREFIX + 'js/ui/ui.core.js',
-            'ui.tabs': STATICMEDIA_PREFIX + 'js/ui/ui.tabs.js',
+            'ui.core': STATICMEDIA_PREFIX + 'js/ui/jquery-ui-1.9.2.js',
             'plugins.fkautocomplete': STATICMEDIA_PREFIX + 'js/plugins/jquery.fkautocomplete.js',
             'plugins.autocomplete': STATICMEDIA_PREFIX + 'js/plugins/jquery.autocomplete.js',
         }
