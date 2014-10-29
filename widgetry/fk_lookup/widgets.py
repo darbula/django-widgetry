@@ -2,13 +2,18 @@
 from django.utils import simplejson
 from django.forms import widgets
 from django.core.urlresolvers import reverse
-from django.utils.text import truncate_words
-
 from django.contrib.contenttypes.models import ContentType
 from widgetry.views import search
 from django.template import loader, Template, Context
 from django.conf import settings
 from widgetry.config import JQUERY_URLS, STATICMEDIA_PREFIX
+from django.utils.text import Truncator
+
+
+def truncate_words(s, num, end_text='...'):
+    end_text = ' {0}'.format(end_text) if end_text else ''
+    return Truncator(s).words(num, truncate=end_text)
+
 
 class FkLookup(widgets.Widget):
     """
