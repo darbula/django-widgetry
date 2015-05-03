@@ -1,6 +1,7 @@
 from django.contrib import admin
 from django.contrib.admin import helpers
 from django.core.exceptions import ImproperlyConfigured
+from django.http import HttpRequest
 from widgetry.config import JQUERY_URLS, STATICMEDIA_PREFIX
 
 try:
@@ -22,7 +23,7 @@ class Tabset(object):
                                  readonly_fields=readonly_fields,
                                  model_admin=model_admin,
                                  **options))
-        
+
         self.prepopulated_fields = [{
             'field': form[field_name],
             'dependencies': [form[f] for f in dependencies]
@@ -33,30 +34,30 @@ class Tabset(object):
     def __iter__(self):
         for tab in self.tabs:
             yield tab
-    
+
     def first_field(self):
         return None
-    
+
     def _media(self):
         media = self.form.media
         for tab in self:
             media = media + tab.media
         return media
     media = property(_media)
-    
+
     def get_tab_for_inline(self, inline):
         for tab in self:
             if inline in tab.inlines:
                 return tab
         return None
-        
+
 
 class Tab(helpers.AdminForm):
     '''
     A subclass of AdminForm. It adds a name and a description and additionally
     also contains the InlineFormsets
     '''
-    def __init__(self, form, name=None, fieldsets=(), inlines=(), 
+    def __init__(self, form, name=None, fieldsets=(), inlines=(),
                  prepopulated_fields={}, readonly_fields=None, model_admin=None,
                  classes=(), description=None):
         self.form = form
@@ -71,10 +72,10 @@ class Tab(helpers.AdminForm):
         self.readonly_fields = readonly_fields
         self.inlines = inlines
         self.inline_admin_formsets = []  # will be populated in ModelAdminWithTabs.render_change_form
-        
+
         self.classes = u' '.join(classes)
         self.description = description
-    
+
     def has_errors(self):
         if not hasattr(self,'_has_errors'):
             self._has_errors = False
@@ -89,11 +90,13 @@ class Tab(helpers.AdminForm):
                             self._has_errors = True
                             break
         return self._has_errors
-            
+
     def _media(self):
         # formset media is already handled in the view
         return super(Tab, self)._media()
     media = property(_media)
+
+_fakeRequest = HttpRequest()
 
 
 class ModelAdminWithTabs(admin.ModelAdmin):
@@ -113,17 +116,17 @@ class ModelAdminWithTabs(admin.ModelAdmin):
 
         # We provide two different ways of doing this here.
         # The original way populates them in Django < 1.4.
-        # In Django 1.4, a different method is required. 
+        # In Django 1.4, a different method is required.
         #
         # Since
         # https://github.com/django/django/commit/b1b1da1eac93297503c04b8394fb98e38f552f5f
-        # django.contrib.admin.options.ModelAdmin.__init__() no longer takes responsibility 
+        # django.contrib.admin.options.ModelAdmin.__init__() no longer takes responsibility
         # for inlines.
         #
         # Instead, a get_inline_instances() method takes care of it.
-        
+
         # the original, for backwards compatibility
-        self.inline_instances = []        
+        self.inline_instances = []
         for inline_class in self._extract_inlines_from_tabs():
             inline_instance = inline_class(self.model, self.admin_site)
             self.inline_instances.append(inline_instance)
@@ -146,6 +149,10 @@ class ModelAdminWithTabs(admin.ModelAdmin):
         """
         form = context['adminform'].form
         inline_admin_formsets = context['inline_admin_formsets']
+
+        # for django-parler http://django-parler.readthedocs.org/en/latest/compatibility.html#using-prepopulated-fields-in-the-admin
+        if hasattr(self, 'get_prepopulated_fields'):
+            self.prepopulated_fields = self.get_prepopulated_fields(_fakeRequest)
 
         adminForm = Tabset(
             form, self.tabs, self.prepopulated_fields, self.get_readonly_fields(request), model_admin=self)

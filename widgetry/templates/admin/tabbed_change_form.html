@@ -41,7 +41,7 @@
     <ul class="errorlist">{% for error in adminform.form.non_field_errors %}<li>{{ error }}</li>{% endfor %}</ul>
 {% endif %}
 
-
+{% if language_tabs %}{% include "admin/parler/language_tabs.html" %}{% endif %}
 <div id="tabs">
 	<ul>
 	{% for tab in adminform %}
