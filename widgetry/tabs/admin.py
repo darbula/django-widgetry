@@ -63,7 +63,7 @@ class Tab(helpers.AdminForm):
         self.form = form
         self.name = name
         # TODO: fieldsets should also be able to contain InlineFormsets
-        self.fieldsets = helpers.normalize_fieldsets(fieldsets)
+        self.fieldsets = fieldsets
         self.prepopulated_fields = [{
             'field': form[field_name],
             'dependencies': [form[f] for f in dependencies]
