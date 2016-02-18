@@ -1,39 +1,66 @@
 {% extends "admin/change_form.html" %}
-{% load i18n admin_modify %}
+{% load i18n admin_urls admin_static admin_modify %}
 
 {% block extrahead %}
 {{ block.super }}
 <script type="text/javascript">
   jQuery(document).ready(function($){
     $("#tabs").tabs({
-		select: function(event, ui) {
-			var form = $('form#{{ opts.module_name }}_form');
-			var panel_id = $(ui.panel).attr('id');
-			 $('form#{{ opts.module_name }}_form').attr('action', '#' + panel_id);
-		}
-	});
+      select: function(event, ui) {
+        var form = $('form#{{ opts.module_name }}_form');
+        var panel_id = $(ui.panel).attr('id');
+         $('form#{{ opts.module_name }}_form').attr('action', '#' + panel_id);
+      }
+    });
   });
 </script>
-{% endblock %}
-{% block extrastyle %}{{ block.super }}
+{% endblock extrahead %}
+
+
+{% block extrastyle %}
+{{ block.super }}
 <style type="text/css">
-	#tabs ul.ui-tabs-nav li { list-style-type: none;}
-	#tabs ul li.has_errors, #tabs ul li.has_errors a { color: red;}
+  #tabs ul.ui-tabs-nav li { list-style-type: none;}
+  #tabs ul li.has_errors, #tabs ul li.has_errors a { color: red;}
 </style>
+{% endblock extrastyle %}
+
+{% if not is_popup %}
+{% block breadcrumbs %}
+<div class="breadcrumbs">
+<a href="{% url 'admin:index' %}">{% trans 'Home' %}</a>
+&rsaquo; <a href="{% url 'admin:app_list' app_label=opts.app_label %}">{{ opts.app_config.verbose_name }}</a>
+&rsaquo; {% if has_change_permission %}<a href="{% url opts|admin_urlname:'changelist' %}">{{ opts.verbose_name_plural|capfirst }}</a>{% else %}{{ opts.verbose_name_plural|capfirst }}{% endif %}
+&rsaquo; {% if add %}{% trans 'Add' %} {{ opts.verbose_name }}{% else %}{{ original|truncatewords:"18" }}{% endif %}
+</div>
 {% endblock %}
+{% endif %}
+
 
 {% block content %}<div id="content-main">
 {% block object-tools %}
 {% if change %}{% if not is_popup %}
-  <ul class="object-tools"><li><a href="history/" class="historylink">{% trans "History" %}</a></li>
-  {% if has_absolute_url %}<li><a href="../../../r/{{ content_type_id }}/{{ object_id }}/" class="viewsitelink">{% trans "View on site" %}</a></li>{% endif%}
+  <ul class="object-tools">
+    {% block object-tools-items %}
+    <li>
+        {% url opts|admin_urlname:'history' original.pk|admin_urlquote as history_url %}
+        <a href="{% add_preserved_filters history_url %}" class="historylink">{% trans "History" %}</a>
+    </li>
+    {% if has_absolute_url %}<li><a href="{{ absolute_url }}" class="viewsitelink">{% trans "View on site" %}</a></li>{% endif %}
+    {% endblock %}
   </ul>
 {% endif %}{% endif %}
 {% endblock %}
-<form {% if has_file_field %}enctype="multipart/form-data" {% endif %}action="{{ form_url }}" method="post" id="{{ opts.module_name }}_form">{% csrf_token %}{% block form_top %}{% endblock %}
+
+
+<form {% if has_file_field %}enctype="multipart/form-data" {% endif %}action="{{ form_url }}" method="post" id="{{ opts.model_name }}_form" novalidate>{% csrf_token %}{% block form_top %}{% endblock %}
 <div>
 {% if is_popup %}<input type="hidden" name="_popup" value="1" />{% endif %}
-{% if save_on_top %}{% submit_row %}{% endif %}
+
+{% if to_field %}<input type="hidden" name="{{ to_field_var }}" value="{{ to_field }}" />{% endif %}
+
+{% if save_on_top %}{% block submit_buttons_top %}{% submit_row %}{% endblock %}{% endif %}
+
 {% if errors %}
     <p class="errornote">
     {% blocktrans count errors|length as counter %}Please correct the error below.{% plural %}Please correct the errors below.{% endblocktrans %}
@@ -41,34 +68,59 @@
     <ul class="errorlist">{% for error in adminform.form.non_field_errors %}<li>{{ error }}</li>{% endfor %}</ul>
 {% endif %}
 
+{% block field_sets %}
 {% if language_tabs %}{% include "admin/parler/language_tabs.html" %}{% endif %}
 <div id="tabs">
-	<ul>
-	{% for tab in adminform %}
-		<li{% if tab.has_errors %} class="has_errors"{% endif %}><a href="#tab_{{ tab.name|slugify }}"><span>{{ tab.name }}</span></a></li>
-	{% endfor %}
-	</ul>
-	{% for tab in adminform %}
-	<div id="tab_{{ tab.name|slugify }}">
-		{% for fieldset in tab %}
-			{% include "admin/includes/fieldset.html" %}
-		{% endfor %}
-		{% for inline_admin_formset in tab.inline_admin_formsets %}
-			{% include inline_admin_formset.opts.template %}
-		{% endfor %}
-	</div>
-	{% endfor %}
+  <ul>
+  {% for tab in adminform %}
+    <li{% if tab.has_errors %} class="has_errors"{% endif %}><a href="#tab_{{ tab.name|slugify }}"><span>{{ tab.name }}</span></a></li>
+  {% endfor %}
+  </ul>
+  {% for tab in adminform %}
+  <div id="tab_{{ tab.name|slugify }}">
+    {% for fieldset in tab %}
+      {% include "admin/includes/fieldset.html" %}
+    {% endfor %}
+    {% for inline_admin_formset in tab.inline_admin_formsets %}
+      {% include inline_admin_formset.opts.template %}
+    {% endfor %}
+  </div>
+  {% endfor %}
 </div>
+{% endblock %}
+
+{% block after_field_sets %}
+{% endblock %}
+
+{% block inline_field_sets %}
 {% for inline_admin_formset in inline_admin_formsets %}
     {% include inline_admin_formset.opts.template %}
 {% endfor %}
+{% endblock %}
+
 {% block after_related_objects %}{% endblock %}
 
-{% submit_row %}
+{% block submit_buttons_bottom %}{% submit_row %}{% endblock %}
 
-{% if adminform and add %}
-   {# <script type="text/javascript">document.getElementById("{{ adminform.first_field.auto_id }}").focus();</script>#}
-{% endif %}
+{% block admin_change_form_document_ready %}
+    <script type="text/javascript">
+        (function($) {
+            $(document).ready(function() {
+                $('.add-another').click(function(e) {
+                    e.preventDefault();
+                    showAddAnotherPopup(this);
+                });
+                $('.related-lookup').click(function(e) {
+                    e.preventDefault();
+                    showRelatedObjectLookupPopup(this);
+                });
+            {% if adminform and add %}
+                $('form#{{ opts.model_name }}_form :input:visible:enabled:first').focus()
+            {% endif %}
+            });
+        })(django.jQuery);
+    </script>
+{% endblock %}
 
 {# JavaScript for prepopulated fields #}
 {% prepopulated_fields_js %}
