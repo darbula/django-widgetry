@@ -37,7 +37,7 @@
 		}, settings.interval);
 		return this;
 	};
-})(jQuery);
+})(widgetryjQuery);
 
 (function($) {
 	$.fn.fkAutocomplete = function(settings) {
@@ -129,7 +129,7 @@
     					} else {
     						$('#add_id_' + input_obj_name).hide();
     					}
-    				}	
+    				}
 				});
 				if (config.content_type_id) {
 					$('#add_id_' + input_obj_name).attr('href', config.add_urls[config.content_type_id].add_url);
@@ -139,4 +139,4 @@
 		});
 		return this;
 	};
-})(jQuery);
+})(widgetryjQuery);

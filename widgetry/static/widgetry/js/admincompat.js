@@ -1,1 +1,1 @@
-var jQuery = django.jQuery;
+var widgetryjQuery = django.jQuery;

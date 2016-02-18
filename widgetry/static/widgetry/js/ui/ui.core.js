@@ -520,4 +520,4 @@ $.ui.mouse.defaults = {
 	delay: 0
 };
 
-})(jQuery);
+})(widgetryjQuery);
