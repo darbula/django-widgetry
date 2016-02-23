@@ -156,7 +156,7 @@ class Search(object):
         ##print data
         #pprint(structured_data)
         if len(structured_data)>0:
-            return HttpResponse(json.dumps(structured_data),mimetype='application/json')
+            return HttpResponse(json.dumps(structured_data), content_type='application/json')
         else:
             return self.not_found(request)
 
@@ -202,7 +202,7 @@ class Search(object):
         #return HttpResponse(status=404)
         # autocomplete fucks up if we return a 404 (it gets handled like
         # a failure)
-        return HttpResponse(json.dumps([]),mimetype='application/json')
+        return HttpResponse(json.dumps([]), content_type='application/json')
 
     def forbidden(self, request):
         return HttpResponse(status=403)
