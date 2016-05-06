@@ -4,7 +4,7 @@ from widgetry.tabs.admin import ModelAdminWithTabs
 from django.forms.widgets import Media
 
 
-class ModelAdminWithTabsAndCMSPlaceholder(ModelAdminWithTabs, PlaceholderAdminMixin):
+class ModelAdminWithTabsAndCMSPlaceholder(PlaceholderAdminMixin, ModelAdminWithTabs):
     def _media(self):
         try:
             placeholdermedia = super(PlaceholderAdminMixin, self).media
