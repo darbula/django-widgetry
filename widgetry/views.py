@@ -96,14 +96,14 @@ class Search(object):
         result as a simple string to be used by the jQuery Autocomplete plugin
         """
         signals.search_request.send(sender=self, request=request)
-        query_string = request.REQUEST.get(query_param, '')
-        limit = int(request.REQUEST.get('limit', '50'))
-        timestamp = request.REQUEST.get('timestamp', '')
+        query_string = request.GET.get(query_param, '')
+        limit = int(request.GET.get('limit', '50'))
+        timestamp = request.GET.get('timestamp', '')
         #print u"QUERY: %s (limit: %s timestamp: %s)" % (query_string, limit, timestamp)
 
         # find the model to search on
-        content_type_id = request.REQUEST.get('content_type_id', None) # an integer
-        content_type_str = request.REQUEST.get('content_type', None) # a string 'myapp.mymodel'
+        content_type_id = request.GET.get('content_type_id', None) # an integer
+        content_type_str = request.GET.get('content_type', None) # a string 'myapp.mymodel'
         if content_type_id:
             content_type = ContentType.objects.get_for_id(content_type_id)
         elif content_type_str:
@@ -118,7 +118,7 @@ class Search(object):
         #print Wrapper
         qs = Model._default_manager.all()
 
-        obj_id = request.REQUEST.get('id',None)
+        obj_id = request.GET.get('id',None)
         if obj_id:
             # a specific obj was provided. return just that
             qs = qs.filter(id=obj_id)
