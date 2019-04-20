@@ -94,7 +94,7 @@ class FkLookup(widgets.Widget):
             value = str(value)
         content_type_info = self.content_type_info
         content_type_info_json = json.dumps(content_type_info)
-        context = Context(locals())
+        context = locals()
         context.update(extra_context)
         r = template.render(context)
         return r
